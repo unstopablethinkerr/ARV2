@@ -1,1185 +1,835 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#080a0f" />
-  <title>AR Viewer</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
 
+  <title>AR 3D Object Viewer</title>
+
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+  <!-- AR.js -->
   <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
   <style>
-    :root {
-      --bg: #080a0f;
-      --surface: rgba(17, 21, 31, 0.91);
-      --surface-light: rgba(255, 255, 255, 0.07);
-      --border: rgba(255, 255, 255, 0.12);
-      --text: #f5f7fb;
-      --muted: #9aa4b5;
-      --accent: #8d7cff;
-      --green: #67e6a7;
-    }
-
     * {
       box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
     }
 
     html,
     body {
-      margin: 0;
       width: 100%;
       height: 100%;
+      margin: 0;
       overflow: hidden;
-      background: var(--bg);
-      color: var(--text);
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: transparent;
+      font-family: Arial, Helvetica, sans-serif;
     }
 
-    button,
-    input {
-      font: inherit;
+    body {
+      position: relative;
     }
 
-    button {
-      cursor: pointer;
+    /* Ensure AR camera video remains visible */
+    video {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      z-index: 0 !important;
+      background: transparent !important;
+    }
+
+    canvas.a-canvas {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 1 !important;
+      background: transparent !important;
     }
 
     a-scene {
       position: fixed !important;
-      inset: 0;
-      z-index: 1;
+      inset: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      background: transparent !important;
+      z-index: 0;
     }
 
-    .a-enter-vr,
-    .a-enter-ar,
-    .a-loader-title {
-      display: none !important;
-    }
-
-    /* ================================
-       TOP BAR
-    ================================= */
-
-    #topbar {
+    .topbar {
       position: fixed;
-      z-index: 10;
-      top: max(15px, env(safe-area-inset-top));
+      top: 15px;
       left: 15px;
       right: 15px;
+      z-index: 20;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      transition: 0.3s ease;
-    }
-
-    #topbar.hidden {
-      opacity: 0;
-      transform: translateY(-12px);
-      pointer-events: none;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 13px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: rgba(8, 10, 15, 0.62);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .logo-mark {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--green);
-      box-shadow: 0 0 13px rgba(103, 230, 167, 0.75);
-    }
-
-    .top-actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    .round-btn {
-      width: 41px;
-      height: 41px;
-      display: grid;
-      place-items: center;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      background: rgba(8, 10, 15, 0.62);
-      color: var(--text);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    .round-btn:active {
-      transform: scale(0.92);
-    }
-
-    svg {
-      width: 18px;
-      height: 18px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    /* ================================
-       BOTTOM CONTROLS
-    ================================= */
-
-    #control-panel {
-      position: fixed;
-      z-index: 10;
-      left: 14px;
-      right: 14px;
-      bottom: max(14px, env(safe-area-inset-bottom));
-      width: min(100% - 28px, 450px);
-      max-height: calc(100vh - 90px);
-      margin: auto;
-      padding: 17px;
-      overflow-y: auto;
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      background: var(--surface);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.4);
-      transition: 0.35s ease;
-    }
-
-    #control-panel.hidden {
-      opacity: 0;
-      transform: translateY(30px);
-      pointer-events: none;
-    }
-
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
       gap: 10px;
-      margin-bottom: 14px;
+      color: white;
+      pointer-events: none;
     }
 
-    .panel-title {
-      min-width: 0;
+    .brand {
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.48);
+      backdrop-filter: blur(12px);
       font-size: 14px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    .selected-name {
-      display: block;
-      max-width: 190px;
-      margin-top: 3px;
-      overflow: hidden;
-      color: var(--accent);
-      font-size: 10px;
       font-weight: 700;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      pointer-events: auto;
     }
 
     .status {
+      padding: 9px 12px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.48);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      font-size: 12px;
+      backdrop-filter: blur(12px);
+    }
+
+    .status::before {
+      content: "";
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      margin-right: 7px;
+      border-radius: 50%;
+      background: #fbbf24;
+    }
+
+    .status.active::before {
+      background: #22c55e;
+      box-shadow: 0 0 10px #22c55e;
+    }
+
+    .bottom-panel {
+      position: fixed;
+      z-index: 20;
+      left: 15px;
+      right: 15px;
+      bottom: 15px;
+      max-height: 48vh;
+      overflow-y: auto;
+      padding: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 22px;
+      background: rgba(10, 10, 15, 0.78);
+      backdrop-filter: blur(18px);
+      color: white;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .bottom-panel.hidden {
+      transform: translateY(130%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .panel-header {
       display: flex;
       align-items: center;
-      gap: 6px;
-      flex-shrink: 0;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
-    #status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #eab65a;
+    .panel-title {
+      font-size: 15px;
+      font-weight: 700;
     }
 
-    #status-dot.tracking {
-      background: var(--green);
-      box-shadow: 0 0 10px rgba(103, 230, 167, 0.7);
+    .small-text {
+      color: rgba(255, 255, 255, 0.65);
+      font-size: 11px;
+      line-height: 1.4;
     }
 
-    .slider-row {
-      margin-bottom: 14px;
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
     }
 
-    .slider-label {
+    button {
+      border: 0;
+      cursor: pointer;
+      color: white;
+      border-radius: 12px;
+      padding: 10px 13px;
+      font-size: 12px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.22);
+    }
+
+    button.primary {
+      background: #2563eb;
+    }
+
+    button.danger {
+      background: #991b1b;
+    }
+
+    .control {
+      margin-top: 13px;
+    }
+
+    .control-label {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 750;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-    }
-
-    .slider-value {
-      color: var(--text);
-      font-variant-numeric: tabular-nums;
+      margin-bottom: 7px;
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 12px;
     }
 
     input[type="range"] {
       width: 100%;
-      height: 4px;
-      appearance: none;
-      -webkit-appearance: none;
-      outline: none;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.14);
+      accent-color: #60a5fa;
     }
 
-    input[type="range"]::-webkit-slider-thumb {
-      width: 18px;
-      height: 18px;
-      appearance: none;
-      -webkit-appearance: none;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 2px 12px rgba(141, 124, 255, 0.4);
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 15px;
-      height: 15px;
-      border: 2px solid #fff;
-      border-radius: 50%;
-      background: var(--accent);
-    }
-
-    .panel-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-      margin-top: 5px;
-    }
-
-    .panel-btn {
-      min-height: 43px;
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      background: var(--surface-light);
-      color: var(--text);
-      font-size: 11px;
-      font-weight: 800;
-    }
-
-    .panel-btn:active {
-      transform: scale(0.97);
-    }
-
-    .panel-btn.primary {
-      border-color: transparent;
-      background: var(--accent);
-    }
-
-    /* ================================
-       OBJECT SELECTOR DRAWER
-    ================================= */
-
-    #object-drawer {
-      position: fixed;
-      z-index: 25;
-      inset: 0;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 14px;
-      background: rgba(3, 5, 9, 0.55);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      opacity: 1;
-      transition: opacity 0.25s ease;
-    }
-
-    #object-drawer.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .drawer-card {
-      width: min(100%, 450px);
-      max-height: min(70vh, 570px);
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      border-radius: 25px;
-      background: var(--surface);
-      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-    }
-
-    .drawer-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 17px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .drawer-heading {
-      font-size: 15px;
-      font-weight: 800;
-    }
-
-    .drawer-subtitle {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .drawer-close {
-      width: 34px;
-      height: 34px;
-      display: grid;
-      place-items: center;
-      flex-shrink: 0;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      background: var(--surface-light);
-      color: var(--text);
-    }
-
-    #objectList {
+    .object-list {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 8px;
-      padding: 14px;
-      overflow-y: auto;
+      margin-top: 12px;
     }
 
-    #objectList button {
-      min-height: 43px;
-      padding: 10px 9px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.045);
-      color: var(--text);
-      font-size: 11px;
-      font-weight: 700;
-      line-height: 1.25;
-      transition: 0.2s ease;
+    .object-list button {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      text-align: left;
     }
 
-    #objectList button:active {
-      transform: scale(0.97);
+    .object-list button.selected {
+      background: #2563eb;
+      border-color: #93c5fd;
     }
 
-    #objectList button.selected {
-      border-color: var(--accent);
-      background: rgba(141, 124, 255, 0.18);
-      color: #fff;
-    }
-
-    /* ================================
-       FLOATING CONTROLS BUTTON
-    ================================= */
-
-    #show-controls {
+    .floating-button {
       position: fixed;
-      z-index: 9;
-      right: 16px;
-      bottom: max(18px, env(safe-area-inset-bottom));
+      right: 15px;
+      bottom: 15px;
+      z-index: 25;
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.72);
+      backdrop-filter: blur(12px);
+      font-size: 20px;
+      display: none;
+    }
+
+    .floating-button.visible {
+      display: block;
+    }
+
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
       display: flex;
       align-items: center;
-      gap: 8px;
-      min-height: 42px;
-      padding: 0 15px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: rgba(8, 10, 15, 0.82);
-      color: var(--text);
-      font-size: 11px;
-      font-weight: 800;
-      opacity: 0;
-      transform: translateY(12px);
-      pointer-events: none;
-      transition: 0.3s ease;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    #show-controls.visible {
-      opacity: 1;
-      transform: translateY(0);
-      pointer-events: auto;
-    }
-
-    #show-controls svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    /* ================================
-       INTRO MODAL
-    ================================= */
-
-    #intro {
-      position: fixed;
-      z-index: 30;
-      inset: 0;
-      display: grid;
-      place-items: center;
+      justify-content: center;
       padding: 20px;
-      background: rgba(3, 5, 9, 0.78);
-      backdrop-filter: blur(13px);
-      -webkit-backdrop-filter: blur(13px);
-      transition: opacity 0.3s ease;
-    }
-
-    #intro.hidden {
-      opacity: 0;
-      pointer-events: none;
+      background: rgba(0, 0, 0, 0.88);
+      color: white;
     }
 
     .intro-card {
-      width: min(100%, 370px);
-      padding: 25px;
-      border: 1px solid var(--border);
-      border-radius: 27px;
-      background:
-        radial-gradient(circle at 100% 0%, rgba(141, 124, 255, 0.13), transparent 42%),
-        #11151f;
+      width: min(420px, 100%);
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 22px;
+      border-radius: 24px;
+      background: #15151d;
+      border: 1px solid rgba(255, 255, 255, 0.14);
       text-align: center;
-      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.5);
-    }
-
-    .intro-icon {
-      width: 57px;
-      height: 57px;
-      display: grid;
-      place-items: center;
-      margin: 0 auto 16px;
-      border: 1px solid rgba(141, 124, 255, 0.3);
-      border-radius: 18px;
-      background: rgba(141, 124, 255, 0.12);
-      color: var(--accent);
-    }
-
-    .intro-icon svg {
-      width: 27px;
-      height: 27px;
     }
 
     .intro-card h1 {
       margin: 0 0 10px;
-      font-size: 23px;
-      letter-spacing: -0.055em;
+      font-size: 24px;
     }
 
     .intro-card p {
-      margin: 0 0 19px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+      line-height: 1.6;
     }
 
     .hiro-image {
+      width: 210px;
+      max-width: 80%;
+      margin: 15px auto;
       display: block;
-      width: 155px;
-      height: auto;
-      margin: 0 auto 19px;
-      border-radius: 12px;
-      background: #fff;
-    }
-
-    .tip {
-      display: flex;
-      gap: 9px;
-      align-items: flex-start;
-      padding: 12px;
-      margin-bottom: 17px;
-      border: 1px solid rgba(103, 230, 167, 0.15);
-      border-radius: 13px;
-      background: rgba(103, 230, 167, 0.055);
-      color: #b7ddd0;
-      font-size: 11px;
-      line-height: 1.5;
-      text-align: left;
-    }
-
-    .tip svg {
-      flex: 0 0 auto;
-      width: 16px;
-      height: 16px;
-      color: var(--green);
-      margin-top: 1px;
-    }
-
-    #start-ar {
-      width: 100%;
-      min-height: 48px;
-      border: 0;
       border-radius: 14px;
-      background: var(--accent);
-      color: white;
-      font-size: 13px;
-      font-weight: 850;
+      background: white;
     }
 
-    #start-ar:active {
-      transform: scale(0.98);
+    .intro-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
     }
 
-    .share-link {
+    .notice {
       margin-top: 12px;
-      border: 0;
-      background: none;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    /* ================================
-       TOAST
-    ================================= */
-
-    #toast {
-      position: fixed;
-      z-index: 100;
-      left: 50%;
-      bottom: max(25px, env(safe-area-inset-bottom));
-      max-width: calc(100% - 30px);
-      padding: 11px 17px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      background: rgba(17, 21, 31, 0.95);
-      color: #fff;
+      padding: 10px;
+      border-radius: 12px;
+      color: #fde68a;
+      background: rgba(146, 64, 14, 0.25);
       font-size: 12px;
-      font-weight: 650;
-      opacity: 0;
-      transform: translate(-50%, 18px);
-      pointer-events: none;
-      transition: 0.25s ease;
-      white-space: nowrap;
+      line-height: 1.5;
     }
 
-    #toast.visible {
-      opacity: 1;
-      transform: translate(-50%, 0);
+    .hidden {
+      display: none !important;
     }
 
-    @media (max-height: 650px) {
-      #control-panel {
-        padding: 13px 15px;
+    @media (max-width: 420px) {
+      .bottom-panel {
+        max-height: 55vh;
       }
 
-      .slider-row {
-        margin-bottom: 9px;
-      }
-
-      .panel-head {
-        margin-bottom: 10px;
-      }
-
-      .intro-card {
-        padding: 20px;
-      }
-
-      .hiro-image {
-        width: 120px;
-        margin-bottom: 14px;
-      }
-    }
-
-    @media (max-width: 340px) {
-      #objectList {
-        grid-template-columns: 1fr;
+      .object-list {
+        grid-template-columns: 1fr 1fr;
       }
     }
   </style>
 </head>
 
 <body>
+  <!-- Intro screen -->
+  <div class="intro" id="intro">
+    <div class="intro-card">
+      <h1>AR 3D Viewer</h1>
 
-  <!-- ============================================================
-       AR SCENE
-       ============================================================ -->
+      <p>
+        Open this Hiro marker image on another phone, laptop, or tablet.
+        Then point your camera at the marker to display the 3D object.
+      </p>
 
+      <img
+        class="hiro-image"
+        src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/hiro_card.png"
+        alt="Hiro AR marker"
+      />
+
+      <div class="small-text">
+        Keep the marker flat, visible, and well-lit.
+      </div>
+
+      <div class="intro-actions">
+        <button class="primary" id="startButton">
+          Start AR Camera
+        </button>
+
+        <button id="shareButton">
+          Share Hiro Marker
+        </button>
+      </div>
+
+      <div class="notice">
+        Camera access works only on HTTPS or localhost.
+        If the camera does not open, allow camera permission in your browser.
+      </div>
+    </div>
+  </div>
+
+  <!-- Top UI -->
+  <div class="topbar">
+    <div class="brand">AR 3D Studio</div>
+    <div class="status" id="status">Marker not detected</div>
+  </div>
+
+  <!-- Bottom controls -->
+  <section class="bottom-panel" id="controlsPanel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">3D Object Controls</div>
+        <div class="small-text">
+          Select an object and adjust its rotation or size.
+        </div>
+      </div>
+
+      <button id="hideControlsButton">Hide</button>
+    </div>
+
+    <div class="button-row">
+      <button id="resetButton">Reset</button>
+      <button id="shareControlsButton">Share Marker</button>
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Rotate X</span>
+        <span id="rotateXValue">0°</span>
+      </div>
+      <input
+        id="rotateX"
+        type="range"
+        min="-180"
+        max="180"
+        value="0"
+      />
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Rotate Y</span>
+        <span id="rotateYValue">0°</span>
+      </div>
+      <input
+        id="rotateY"
+        type="range"
+        min="-180"
+        max="180"
+        value="0"
+      />
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Rotate Z</span>
+        <span id="rotateZValue">0°</span>
+      </div>
+      <input
+        id="rotateZ"
+        type="range"
+        min="-180"
+        max="180"
+        value="0"
+      />
+    </div>
+
+    <div class="control">
+      <div class="control-label">
+        <span>Scale</span>
+        <span id="scaleValue">1.0x</span>
+      </div>
+      <input
+        id="scale"
+        type="range"
+        min="0.1"
+        max="3"
+        step="0.1"
+        value="1"
+      />
+    </div>
+
+    <div class="panel-title" style="margin-top: 18px;">
+      Select Object
+    </div>
+
+    <div class="object-list" id="objectList">
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf">
+        Iron Man
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/cowboyhat.glb">
+        Cow Boy Hat
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/antiquecar.glb">
+        Antique Car
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/table.glb">
+        Table
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Bee.glb">
+        Bee
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Windmill.glb">
+        Windmill
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Mountain_Bike.glb">
+        Mountain Bike
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/solar_system.glb">
+        Solar System
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/instagram.glb">
+        Instagram
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/marvel_spider-man.glb">
+        Spider Man
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Giant_Floor_Lamp.glb">
+        Study Lamp
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_earth.glb">
+        Earth
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_moon_sharp.glb">
+        Moon
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/pony_cartoon.glb">
+        Pony Car
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Wolf-Blender.glb">
+        Wolf
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/chinese_dragon.glb">
+        Chinese Dragon
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_big_g_building.glb">
+        Building
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/coeur.glb">
+        Heart Glass
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/heart_in_love.glb">
+        Heart In Love
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/huracan_falcontm.glb">
+        Huracan Falcon
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/130.glb">
+        Car
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/alfa_romeo_stradale_1967.glb">
+        Alfa Romeo Stradale
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/charger.glb">
+        Adapter
+      </button>
+
+      <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/shape4.glb">
+        Sample
+      </button>
+    </div>
+  </section>
+
+  <button
+    class="floating-button"
+    id="showControlsButton"
+    aria-label="Show controls"
+  >
+    ⚙
+  </button>
+
+  <!-- AR Scene -->
   <a-scene
-    id="ar-scene"
+    id="arScene"
     embedded
     vr-mode-ui="enabled: false"
-    renderer="antialias: true; alpha: true; colorManagement: true"
-    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
-    device-orientation-permission-ui="enabled: false"
+    renderer="
+      antialias: true;
+      alpha: true;
+      colorManagement: true;
+      physicallyCorrectLights: true;
+      sortObjects: true
+    "
+    color-space="sRGB"
+    arjs="
+      sourceType: webcam;
+      facingMode: environment;
+      debugUIEnabled: false;
+      detectionMode: mono_and_matrix;
+      matrixCodeType: 3x3;
+    "
     loading-screen="enabled: false"
   >
-    <a-assets>
-      <!-- Initial model. JavaScript changes this when an object is selected. -->
-      <a-asset-item
-        id="model-asset"
-        src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf">
-      </a-asset-item>
-    </a-assets>
+    <a-assets timeout="60000"></a-assets>
 
-    <!-- Hiro marker is built into AR.js. No .mind file. -->
     <a-marker
-      id="hiro-marker"
+      id="hiroMarker"
       preset="hiro"
       smooth="true"
       smoothCount="10"
       smoothTolerance="0.01"
       smoothThreshold="5"
     >
+      <!-- Strong neutral lights for GLB/GLTF materials -->
+      <a-entity light="type: ambient; color: #ffffff; intensity: 2.2"></a-entity>
+
       <a-entity
-        id="model-wrapper"
+        light="type: directional; color: #ffffff; intensity: 3"
+        position="2 4 4"
+      ></a-entity>
+
+      <a-entity
+        light="type: directional; color: #ffffff; intensity: 2"
+        position="-3 2 1"
+      ></a-entity>
+
+      <a-entity
+        light="type: point; color: #ffffff; intensity: 1.5"
+        position="0 3 2"
+      ></a-entity>
+
+      <a-gltf-model
+        id="model"
+        src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf"
         position="0 0 0"
         rotation="0 0 0"
-        scale="0.3 0.3 0.3"
-      >
-        <a-gltf-model
-          id="model"
-          src="#model-asset"
-          position="0 0 0"
-          rotation="0 0 0"
-        ></a-gltf-model>
-      </a-entity>
+        scale="1 1 1"
+        shadow="cast: true; receive: true"
+      ></a-gltf-model>
     </a-marker>
 
     <a-entity camera></a-entity>
   </a-scene>
 
-  <!-- ============================================================
-       TOP BAR
-       ============================================================ -->
-
-  <header id="topbar">
-    <div class="logo">
-      <span class="logo-mark"></span>
-      AR Viewer
-    </div>
-
-    <div class="top-actions">
-      <button class="round-btn" id="share-btn" type="button" aria-label="Share">
-        <svg viewBox="0 0 24 24">
-          <circle cx="18" cy="5" r="2.5"></circle>
-          <circle cx="6" cy="12" r="2.5"></circle>
-          <circle cx="18" cy="19" r="2.5"></circle>
-          <path d="m8.2 10.8 7.6-4.5"></path>
-          <path d="m8.2 13.2 7.6 4.5"></path>
-        </svg>
-      </button>
-
-      <button class="round-btn" id="help-btn" type="button" aria-label="Instructions">
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-1.1 1-1.9 1.3-1.9 2.7"></path>
-          <path d="M12 17h.01"></path>
-        </svg>
-      </button>
-    </div>
-  </header>
-
-  <!-- ============================================================
-       CONTROL PANEL
-       ============================================================ -->
-
-  <section id="control-panel">
-    <div class="panel-head">
-      <div>
-        <div class="panel-title">Model controls</div>
-        <span class="selected-name" id="selected-name">Iron Man</span>
-      </div>
-
-      <div class="status">
-        <span id="status-dot"></span>
-        <span id="status-text">Searching</span>
-      </div>
-    </div>
-
-    <div class="slider-row">
-      <div class="slider-label">
-        <span>Rotation X</span>
-        <span class="slider-value" id="rx-value">0°</span>
-      </div>
-      <input id="rotation-x" type="range" min="-180" max="180" value="0" step="1" />
-    </div>
-
-    <div class="slider-row">
-      <div class="slider-label">
-        <span>Rotation Y</span>
-        <span class="slider-value" id="ry-value">0°</span>
-      </div>
-      <input id="rotation-y" type="range" min="-180" max="180" value="0" step="1" />
-    </div>
-
-    <div class="slider-row">
-      <div class="slider-label">
-        <span>Rotation Z</span>
-        <span class="slider-value" id="rz-value">0°</span>
-      </div>
-      <input id="rotation-z" type="range" min="-180" max="180" value="0" step="1" />
-    </div>
-
-    <div class="slider-row">
-      <div class="slider-label">
-        <span>Scale</span>
-        <span class="slider-value" id="scale-value">0.30×</span>
-      </div>
-      <input id="model-scale" type="range" min="0.01" max="2" value="0.3" step="0.01" />
-    </div>
-
-    <div class="panel-buttons">
-      <button class="panel-btn" id="objects-btn" type="button">
-        <svg viewBox="0 0 24 24" style="vertical-align:-4px; margin-right:4px;">
-          <rect x="4" y="4" width="6" height="6" rx="1"></rect>
-          <rect x="14" y="4" width="6" height="6" rx="1"></rect>
-          <rect x="4" y="14" width="6" height="6" rx="1"></rect>
-          <rect x="14" y="14" width="6" height="6" rx="1"></rect>
-        </svg>
-        Objects
-      </button>
-
-      <button class="panel-btn" id="reset-btn" type="button">
-        <svg viewBox="0 0 24 24" style="vertical-align:-4px; margin-right:4px;">
-          <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-          <path d="M3 4v5h5"></path>
-        </svg>
-        Reset
-      </button>
-
-      <button class="panel-btn primary" id="hide-btn" type="button" style="grid-column: 1 / -1;">
-        <svg viewBox="0 0 24 24" style="vertical-align:-4px; margin-right:4px;">
-          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
-          <circle cx="12" cy="12" r="2.5"></circle>
-        </svg>
-        Hide controls
-      </button>
-    </div>
-  </section>
-
-  <!-- ============================================================
-       OBJECT SELECTOR
-       ============================================================ -->
-
-  <div id="object-drawer" class="hidden">
-    <div class="drawer-card">
-      <div class="drawer-head">
-        <div>
-          <div class="drawer-heading">Choose an object</div>
-          <div class="drawer-subtitle">Select a model to place on the Hiro marker</div>
-        </div>
-
-        <button class="drawer-close" id="close-drawer" type="button" aria-label="Close object selector">
-          <svg viewBox="0 0 24 24">
-            <path d="M6 6l12 12"></path>
-            <path d="M18 6 6 18"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div id="objectList">
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf">Iron Man</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/cowboyhat.glb">Cow Boy Hat</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/antiquecar.glb">Antique Car</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/table.glb">Table</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Bee.glb">Bee</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Windmill.glb">Windmill</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Mountain_Bike.glb">Mountain Bike</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/solar_system.glb">Solar System</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/instagram.glb">Instagram</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/marvel_spider-man.glb">Spider Man</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Giant_Floor_Lamp.glb">Study Lamp</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_earth.glb">Earth</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_moon_sharp.glb">Moon</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/pony_cartoon.glb">Pony Car</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Wolf-Blender.glb">Wolf</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/chinese_dragon.glb">Chinese Dragon</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_big_g_building.glb">Building</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/coeur.glb">Heart Glass</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/heart_in_love.glb">Heart In Love</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/huracan_falcontm.glb">Huracan Falcon</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/130.glb">Car</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/alfa_romeo_stradale_1967.glb">Alfa Romeo Stradale</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/charger.glb">Adapter</button>
-        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/shape4.glb">Sample</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ============================================================
-       FLOATING SHOW CONTROLS
-       ============================================================ -->
-
-  <button id="show-controls" type="button">
-    <svg viewBox="0 0 24 24">
-      <path d="M4 7h16"></path>
-      <path d="M4 12h16"></path>
-      <path d="M4 17h16"></path>
-    </svg>
-    Controls
-  </button>
-
-  <!-- ============================================================
-       STARTUP INSTRUCTIONS
-       ============================================================ -->
-
-  <div id="intro">
-    <div class="intro-card">
-      <div class="intro-icon">
-        <svg viewBox="0 0 24 24">
-          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-          <path d="M7 9h.01M10 9h.01"></path>
-          <path d="M7 12h10M7 15h10"></path>
-        </svg>
-      </div>
-
-      <h1>Ready for AR?</h1>
-
-      <p>
-        Open the Hiro marker card on another device.
-        Then point this device's camera at the card to view the 3D model.
-      </p>
-
-      <img
-        class="hiro-image"
-        src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/hiro_card.png"
-        alt="Hiro AR marker card"
-      />
-
-      <div class="tip">
-        <svg viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9"></circle>
-          <path d="M12 10v6"></path>
-          <path d="M12 7h.01"></path>
-        </svg>
-        <span>
-          <strong>Use another screen:</strong> Display the Hiro card on a
-          second phone, tablet, or computer. Keep it flat and well lit.
-        </span>
-      </div>
-
-      <button id="start-ar" type="button">
-        Start AR camera
-      </button>
-
-      <button class="share-link" id="intro-share" type="button">
-        Share this experience
-      </button>
-    </div>
-  </div>
-
-  <!-- Toast -->
-  <div id="toast" role="status" aria-live="polite"></div>
-
   <script>
-    (() => {
-      "use strict";
+    const scene = document.getElementById("arScene");
+    const marker = document.getElementById("hiroMarker");
+    const model = document.getElementById("model");
+
+    const intro = document.getElementById("intro");
+    const startButton = document.getElementById("startButton");
+    const shareButton = document.getElementById("shareButton");
+    const shareControlsButton = document.getElementById("shareControlsButton");
+
+    const controlsPanel = document.getElementById("controlsPanel");
+    const hideControlsButton = document.getElementById("hideControlsButton");
+    const showControlsButton = document.getElementById("showControlsButton");
+
+    const status = document.getElementById("status");
+    const resetButton = document.getElementById("resetButton");
+
+    const rotateX = document.getElementById("rotateX");
+    const rotateY = document.getElementById("rotateY");
+    const rotateZ = document.getElementById("rotateZ");
+    const scale = document.getElementById("scale");
+
+    const rotateXValue = document.getElementById("rotateXValue");
+    const rotateYValue = document.getElementById("rotateYValue");
+    const rotateZValue = document.getElementById("rotateZValue");
+    const scaleValue = document.getElementById("scaleValue");
+
+    let currentModelUrl =
+      "https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf";
+
+    function updateModelTransform() {
+      const x = Number(rotateX.value);
+      const y = Number(rotateY.value);
+      const z = Number(rotateZ.value);
+      const s = Number(scale.value);
+
+      model.setAttribute("rotation", `${x} ${y} ${z}`);
+      model.setAttribute("scale", `${s} ${s} ${s}`);
+
+      rotateXValue.textContent = `${x}°`;
+      rotateYValue.textContent = `${y}°`;
+      rotateZValue.textContent = `${z}°`;
+      scaleValue.textContent = `${s.toFixed(1)}x`;
+    }
+
+    function resetTransform() {
+      rotateX.value = 0;
+      rotateY.value = 0;
+      rotateZ.value = 0;
+      scale.value = 1;
+      updateModelTransform();
+    }
+
+    function selectObject(button) {
+      const modelUrl = button.dataset.model;
+
+      if (!modelUrl) return;
+
+      currentModelUrl = modelUrl;
+
+      document
+        .querySelectorAll("#objectList button")
+        .forEach((item) => item.classList.remove("selected"));
+
+      button.classList.add("selected");
 
       /*
-       * ============================================================
-       * DOM
-       * ============================================================
+       * Important:
+       * Set src directly on a-gltf-model.
+       * Do not use an asset item for dynamic model switching.
        */
+      model.setAttribute("src", modelUrl);
 
-      const scene = document.querySelector("#ar-scene");
-      const marker = document.querySelector("#hiro-marker");
-      const modelWrapper = document.querySelector("#model-wrapper");
-      const model = document.querySelector("#model");
-      const modelAsset = document.querySelector("#model-asset");
+      resetTransform();
 
-      const intro = document.querySelector("#intro");
-      const startAr = document.querySelector("#start-ar");
-      const helpBtn = document.querySelector("#help-btn");
+      status.textContent = "Loading 3D object...";
+      status.classList.remove("active");
 
-      const shareBtn = document.querySelector("#share-btn");
-      const introShare = document.querySelector("#intro-share");
+      model.addEventListener(
+        "model-loaded",
+        () => {
+          status.textContent = "Point camera at Hiro marker";
+        },
+        { once: true }
+      );
 
-      const controlPanel = document.querySelector("#control-panel");
-      const topbar = document.querySelector("#topbar");
-      const hideBtn = document.querySelector("#hide-btn");
-      const showControls = document.querySelector("#show-controls");
-      const resetBtn = document.querySelector("#reset-btn");
+      model.addEventListener(
+        "model-error",
+        () => {
+          status.textContent = "Model failed to load";
+          console.error("Could not load model:", modelUrl);
+        },
+        { once: true }
+      );
+    }
 
-      const objectsBtn = document.querySelector("#objects-btn");
-      const objectDrawer = document.querySelector("#object-drawer");
-      const closeDrawer = document.querySelector("#close-drawer");
-      const objectList = document.querySelector("#objectList");
-      const selectedName = document.querySelector("#selected-name");
+    async function shareMarker() {
+      const markerUrl =
+        "https://raw.githubusercontent.com/unstopablethinkerr/AR/main/hiro_card.png";
 
-      const statusDot = document.querySelector("#status-dot");
-      const statusText = document.querySelector("#status-text");
-      const toast = document.querySelector("#toast");
+      const shareData = {
+        title: "AR Hiro Marker",
+        text: "Open this Hiro marker image on another device for the AR 3D viewer.",
+        url: markerUrl
+      };
 
-      const rx = document.querySelector("#rotation-x");
-      const ry = document.querySelector("#rotation-y");
-      const rz = document.querySelector("#rotation-z");
-      const scale = document.querySelector("#model-scale");
+      try {
+        if (navigator.share) {
+          await navigator.share(shareData);
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(markerUrl);
+          alert("Hiro marker link copied.");
+        } else {
+          prompt("Copy this Hiro marker URL:", markerUrl);
+        }
+      } catch (error) {
+        console.log("Share cancelled or unavailable:", error);
+      }
+    }
 
-      const rxValue = document.querySelector("#rx-value");
-      const ryValue = document.querySelector("#ry-value");
-      const rzValue = document.querySelector("#rz-value");
-      const scaleValue = document.querySelector("#scale-value");
+    function startCamera() {
+      intro.classList.add("hidden");
 
-      let toastTimer;
-      let isTracking = false;
-
-      /*
-       * ============================================================
-       * TOAST
-       * ============================================================
-       */
-
-      function showToast(message) {
-        toast.textContent = message;
-        toast.classList.add("visible");
-
-        clearTimeout(toastTimer);
-
-        toastTimer = setTimeout(() => {
-          toast.classList.remove("visible");
-        }, 2300);
+      if (
+        location.protocol !== "https:" &&
+        location.hostname !== "localhost" &&
+        location.hostname !== "127.0.0.1"
+      ) {
+        alert(
+          "Camera requires HTTPS or localhost. Open this page using an HTTPS hosting service."
+        );
       }
 
       /*
-       * ============================================================
-       * MODEL TRANSFORMS
-       * ============================================================
+       * Force AR.js video/canvas transparency after scene initialization.
        */
+      setTimeout(() => {
+        const video = document.querySelector("video");
+        const canvas = document.querySelector("canvas");
 
-      function updateTransform() {
-        const x = Number(rx.value);
-        const y = Number(ry.value);
-        const z = Number(rz.value);
-        const s = Number(scale.value);
+        if (video) {
+          video.style.position = "fixed";
+          video.style.inset = "0";
+          video.style.width = "100%";
+          video.style.height = "100%";
+          video.style.objectFit = "cover";
+          video.style.zIndex = "0";
+        }
 
-        /*
-         * A-Frame rotation format:
-         * rotation="X Y Z"
-         *
-         * All three rotations are applied to the wrapper.
-         * The Hiro marker pose remains unchanged.
-         */
-        modelWrapper.setAttribute("rotation", `${x} ${y} ${z}`);
-        modelWrapper.setAttribute("scale", `${s} ${s} ${s}`);
+        if (canvas) {
+          canvas.style.position = "fixed";
+          canvas.style.inset = "0";
+          canvas.style.zIndex = "1";
+          canvas.style.background = "transparent";
+        }
+      }, 1200);
+    }
 
-        rxValue.textContent = `${x}°`;
-        ryValue.textContent = `${y}°`;
-        rzValue.textContent = `${z}°`;
-        scaleValue.textContent = `${s.toFixed(2)}×`;
-      }
+    startButton.addEventListener("click", startCamera);
+    shareButton.addEventListener("click", shareMarker);
+    shareControlsButton.addEventListener("click", shareMarker);
 
-      function resetTransform() {
-        rx.value = "0";
-        ry.value = "0";
-        rz.value = "0";
-        scale.value = "0.3";
+    hideControlsButton.addEventListener("click", () => {
+      controlsPanel.classList.add("hidden");
+      showControlsButton.classList.add("visible");
+    });
 
-        updateTransform();
-        showToast("Model reset");
-      }
+    showControlsButton.addEventListener("click", () => {
+      controlsPanel.classList.remove("hidden");
+      showControlsButton.classList.remove("visible");
+    });
 
-      /*
-       * ============================================================
-       * OBJECT SELECTION
-       * ============================================================
-       *
-       * Changing the asset item's src and the model's src lets
-       * the same AR marker display a different GLB/GLTF.
-       */
+    resetButton.addEventListener("click", resetTransform);
 
-      function selectObject(button) {
-        const modelUrl = button.dataset.model;
-        const objectName = button.textContent.trim();
+    rotateX.addEventListener("input", updateModelTransform);
+    rotateY.addEventListener("input", updateModelTransform);
+    rotateZ.addEventListener("input", updateModelTransform);
+    scale.addEventListener("input", updateModelTransform);
 
-        if (!modelUrl) return;
+    document.querySelectorAll("#objectList button").forEach((button, index) => {
+      button.addEventListener("click", () => selectObject(button));
 
-        // Update the asset source.
-        modelAsset.setAttribute("src", modelUrl);
-
-        // Update the model source.
-        model.setAttribute("src", modelUrl);
-
-        // Reset orientation and scale for the new model.
-        resetTransform();
-
-        // Update selected label.
-        selectedName.textContent = objectName;
-
-        // Highlight selected object.
-        objectList.querySelectorAll("button").forEach((item) => {
-          item.classList.remove("selected");
-        });
-
+      if (index === 0) {
         button.classList.add("selected");
-
-        closeObjectDrawer();
-        showToast(`${objectName} selected`);
       }
+    });
 
-      objectList.querySelectorAll("button").forEach((button) => {
-        button.addEventListener("click", () => {
-          selectObject(button);
-        });
-      });
+    marker.addEventListener("markerFound", () => {
+      status.textContent = "Hiro marker detected";
+      status.classList.add("active");
+    });
 
-      function openObjectDrawer() {
-        objectDrawer.classList.remove("hidden");
-      }
+    marker.addEventListener("markerLost", () => {
+      status.textContent = "Marker not detected";
+      status.classList.remove("active");
+    });
 
-      function closeObjectDrawer() {
-        objectDrawer.classList.add("hidden");
-      }
-
-      objectsBtn.addEventListener("click", openObjectDrawer);
-      closeDrawer.addEventListener("click", closeObjectDrawer);
-
-      // Close when tapping the dark backdrop.
-      objectDrawer.addEventListener("click", (event) => {
-        if (event.target === objectDrawer) {
-          closeObjectDrawer();
-        }
-      });
+    scene.addEventListener("loaded", () => {
+      console.log("AR scene loaded");
 
       /*
-       * ============================================================
-       * UI VISIBILITY
-       * ============================================================
+       * Keep scene transparent.
        */
+      const renderer = scene.renderer;
 
-      function hideUI() {
-        controlPanel.classList.add("hidden");
-        topbar.classList.add("hidden");
-        showControls.classList.add("visible");
+      if (renderer) {
+        renderer.setClearColor(0x000000, 0);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
       }
+    });
 
-      function showUI() {
-        controlPanel.classList.remove("hidden");
-        topbar.classList.remove("hidden");
-        showControls.classList.remove("visible");
-      }
+    model.addEventListener("model-loaded", () => {
+      console.log("Initial model loaded");
+      status.textContent = "Point camera at Hiro marker";
+    });
 
-      function openInstructions() {
-        intro.classList.remove("hidden");
-      }
+    model.addEventListener("model-error", (event) => {
+      console.error("Initial model loading error:", event);
+      status.textContent = "3D model failed to load";
+    });
 
-      function closeInstructions() {
-        intro.classList.add("hidden");
-      }
-
-      /*
-       * ============================================================
-       * SHARE
-       * ============================================================
-       */
-
-      async function shareExperience() {
-        const data = {
-          title: "AR Viewer",
-          text: "Open this AR experience and scan the Hiro marker.",
-          url: window.location.href
-        };
-
-        try {
-          if (navigator.share) {
-            await navigator.share(data);
-            return;
-          }
-
-          if (navigator.clipboard && window.isSecureContext) {
-            await navigator.clipboard.writeText(window.location.href);
-            showToast("Link copied");
-            return;
-          }
-
-          const textarea = document.createElement("textarea");
-          textarea.value = window.location.href;
-          textarea.style.position = "fixed";
-          textarea.style.opacity = "0";
-          document.body.appendChild(textarea);
-          textarea.select();
-          document.execCommand("copy");
-          textarea.remove();
-
-          showToast("Link copied");
-        } catch (error) {
-          if (error && error.name === "AbortError") return;
-          showToast("Sharing cancelled");
-        }
-      }
-
-      /*
-       * ============================================================
-       * EVENTS
-       * ============================================================
-       */
-
-      [rx, ry, rz, scale].forEach((input) => {
-        input.addEventListener("input", updateTransform);
-      });
-
-      resetBtn.addEventListener("click", resetTransform);
-      hideBtn.addEventListener("click", hideUI);
-      showControls.addEventListener("click", showUI);
-
-      shareBtn.addEventListener("click", shareExperience);
-      introShare.addEventListener("click", shareExperience);
-
-      helpBtn.addEventListener("click", openInstructions);
-
-      startAr.addEventListener("click", () => {
-        closeInstructions();
-      });
-
-      /*
-       * ============================================================
-       * MARKER STATUS
-       * ============================================================
-       */
-
-      marker.addEventListener("markerFound", () => {
-        isTracking = true;
-        statusDot.classList.add("tracking");
-        statusText.textContent = "Tracking";
-
-        // Hide UI automatically after the marker is found.
-        setTimeout(() => {
-          if (isTracking) hideUI();
-        }, 800);
-      });
-
-      marker.addEventListener("markerLost", () => {
-        isTracking = false;
-        statusDot.classList.remove("tracking");
-        statusText.textContent = "Searching";
-      });
-
-      /*
-       * ============================================================
-       * INITIALIZATION
-       * ============================================================
-       */
-
-      // Mark Iron Man as the initial selected object.
-      const firstObject = objectList.querySelector("button");
-      if (firstObject) {
-        firstObject.classList.add("selected");
-        selectedName.textContent = firstObject.textContent.trim();
-      }
-
-      updateTransform();
-    })();
+    updateModelTransform();
   </script>
 </body>
 </html>
