@@ -3,42 +3,39 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#07090d" />
-  <title>AR Experience</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#080a0f" />
+  <title>AR Viewer</title>
 
-  <!-- A-Frame + MindAR -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
   <style>
     :root {
-      --bg: #07090d;
-      --panel: rgba(16, 20, 29, 0.84);
-      --panel-border: rgba(255, 255, 255, 0.11);
-      --text: #f6f7fb;
-      --muted: #9da5b5;
-      --accent: #8b7cff;
-      --accent-2: #5ce1e6;
-      --danger: #ff6b81;
-      --radius: 20px;
+      --bg: #080a0f;
+      --surface: rgba(17, 21, 31, 0.91);
+      --surface-light: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #f5f7fb;
+      --muted: #9aa4b5;
+      --accent: #8d7cff;
+      --green: #67e6a7;
     }
 
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
     }
 
     html,
     body {
+      margin: 0;
       width: 100%;
       height: 100%;
-      margin: 0;
       overflow: hidden;
       background: var(--bg);
       color: var(--text);
-      font-family:
-        Inter, ui-sans-serif, system-ui, -apple-system,
-        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     button,
@@ -47,108 +44,92 @@
     }
 
     button {
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #ar-container {
-      position: fixed;
-      inset: 0;
-      background: #000;
+      cursor: pointer;
     }
 
     a-scene {
-      position: absolute !important;
+      position: fixed !important;
       inset: 0;
       z-index: 1;
     }
 
-    /* Hide A-Frame's default VR/AR button */
     .a-enter-vr,
     .a-enter-ar,
     .a-loader-title {
       display: none !important;
     }
 
-    /* --------------------------------
-       Top bar
-    --------------------------------- */
+    /* ================================
+       TOP BAR
+    ================================= */
 
-    .topbar {
+    #topbar {
       position: fixed;
-      z-index: 20;
-      top: max(16px, env(safe-area-inset-top));
-      left: 16px;
-      right: 16px;
+      z-index: 10;
+      top: max(15px, env(safe-area-inset-top));
+      left: 15px;
+      right: 15px;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      pointer-events: none;
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
+      align-items: center;
+      transition: 0.3s ease;
     }
 
-    .topbar.hidden {
+    #topbar.hidden {
       opacity: 0;
-      transform: translateY(-15px);
+      transform: translateY(-12px);
       pointer-events: none;
     }
 
-    .brand {
+    .logo {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       padding: 9px 13px;
-      border: 1px solid var(--panel-border);
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: rgba(10, 13, 20, 0.65);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      background: rgba(8, 10, 15, 0.62);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      pointer-events: auto;
     }
 
-    .brand-dot {
+    .logo-mark {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--accent-2);
-      box-shadow: 0 0 14px var(--accent-2);
+      background: var(--green);
+      box-shadow: 0 0 13px rgba(103, 230, 167, 0.75);
     }
 
     .top-actions {
       display: flex;
       gap: 8px;
-      pointer-events: auto;
     }
 
-    .icon-button {
-      width: 42px;
-      height: 42px;
+    .round-btn {
+      width: 41px;
+      height: 41px;
       display: grid;
       place-items: center;
-      border: 1px solid var(--panel-border);
+      border: 1px solid var(--border);
       border-radius: 50%;
-      background: rgba(10, 13, 20, 0.65);
+      background: rgba(8, 10, 15, 0.62);
       color: var(--text);
-      cursor: pointer;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      transition:
-        background 0.2s ease,
-        transform 0.2s ease;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
-    .icon-button:active {
+    .round-btn:active {
       transform: scale(0.92);
     }
 
-    .icon-button svg {
-      width: 19px;
-      height: 19px;
+    svg {
+      width: 18px;
+      height: 18px;
       fill: none;
       stroke: currentColor;
       stroke-width: 1.8;
@@ -156,113 +137,115 @@
       stroke-linejoin: round;
     }
 
-    /* --------------------------------
-       Bottom controls
-    --------------------------------- */
+    /* ================================
+       BOTTOM CONTROLS
+    ================================= */
 
-    .controls {
+    #control-panel {
       position: fixed;
-      z-index: 20;
+      z-index: 10;
       left: 14px;
       right: 14px;
       bottom: max(14px, env(safe-area-inset-bottom));
-      max-width: 470px;
-      margin: 0 auto;
+      width: min(100% - 28px, 450px);
+      max-height: calc(100vh - 90px);
+      margin: auto;
       padding: 17px;
-      border: 1px solid var(--panel-border);
-      border-radius: 25px;
-      background: var(--panel);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow:
-        0 18px 60px rgba(0, 0, 0, 0.35),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
-      transition:
-        opacity 0.35s ease,
-        transform 0.35s ease;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--surface);
+      backdrop-filter: blur(25px);
+      -webkit-backdrop-filter: blur(25px);
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.4);
+      transition: 0.35s ease;
     }
 
-    .controls.hidden {
+    #control-panel.hidden {
       opacity: 0;
       transform: translateY(30px);
       pointer-events: none;
     }
 
-    .controls-heading {
+    .panel-head {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      gap: 10px;
       margin-bottom: 14px;
     }
 
-    .controls-title {
+    .panel-title {
+      min-width: 0;
       font-size: 14px;
-      font-weight: 750;
+      font-weight: 800;
       letter-spacing: -0.02em;
     }
 
-    .tracking-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: var(--muted);
+    .selected-name {
+      display: block;
+      max-width: 190px;
+      margin-top: 3px;
+      overflow: hidden;
+      color: var(--accent);
       font-size: 10px;
       font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
       letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
-    .status-dot {
+    #status-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: #f0b95a;
-      transition: background 0.25s ease;
+      background: #eab65a;
     }
 
-    .status-dot.active {
-      background: #62e6a7;
-      box-shadow: 0 0 12px rgba(98, 230, 167, 0.6);
+    #status-dot.tracking {
+      background: var(--green);
+      box-shadow: 0 0 10px rgba(103, 230, 167, 0.7);
     }
 
-    .control-row {
+    .slider-row {
       margin-bottom: 14px;
     }
 
-    .control-row:last-of-type {
-      margin-bottom: 15px;
-    }
-
-    .control-label {
+    .slider-label {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       margin-bottom: 8px;
       color: var(--muted);
-      font-size: 11px;
-      font-weight: 650;
-      letter-spacing: 0.04em;
+      font-size: 10px;
+      font-weight: 750;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
     }
 
-    .control-value {
+    .slider-value {
       color: var(--text);
       font-variant-numeric: tabular-nums;
-      font-size: 11px;
-      font-weight: 750;
     }
 
     input[type="range"] {
       width: 100%;
       height: 4px;
-      display: block;
-      margin: 0;
       appearance: none;
       -webkit-appearance: none;
-      border-radius: 99px;
       outline: none;
-      background: rgba(255, 255, 255, 0.13);
-      cursor: pointer;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.14);
     }
 
     input[type="range"]::-webkit-slider-thumb {
@@ -273,7 +256,7 @@
       border: 2px solid #fff;
       border-radius: 50%;
       background: var(--accent);
-      box-shadow: 0 2px 12px rgba(139, 124, 255, 0.4);
+      box-shadow: 0 2px 12px rgba(141, 124, 255, 0.4);
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -282,62 +265,140 @@
       border: 2px solid #fff;
       border-radius: 50%;
       background: var(--accent);
-      cursor: pointer;
     }
 
-    .button-row {
+    .panel-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 9px;
+      margin-top: 5px;
     }
 
-    .control-button {
+    .panel-btn {
       min-height: 43px;
-      border: 1px solid var(--panel-border);
+      border: 1px solid var(--border);
       border-radius: 13px;
-      background: rgba(255, 255, 255, 0.055);
+      background: var(--surface-light);
       color: var(--text);
-      font-size: 12px;
-      font-weight: 750;
-      cursor: pointer;
-      transition:
-        background 0.2s ease,
-        transform 0.2s ease;
+      font-size: 11px;
+      font-weight: 800;
     }
 
-    .control-button:active {
+    .panel-btn:active {
       transform: scale(0.97);
     }
 
-    .control-button.primary {
+    .panel-btn.primary {
       border-color: transparent;
       background: var(--accent);
+    }
+
+    /* ================================
+       OBJECT SELECTOR DRAWER
+    ================================= */
+
+    #object-drawer {
+      position: fixed;
+      z-index: 25;
+      inset: 0;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 14px;
+      background: rgba(3, 5, 9, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      opacity: 1;
+      transition: opacity 0.25s ease;
+    }
+
+    #object-drawer.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .drawer-card {
+      width: min(100%, 450px);
+      max-height: min(70vh, 570px);
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 25px;
+      background: var(--surface);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 17px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .drawer-heading {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .drawer-subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .drawer-close {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      background: var(--surface-light);
+      color: var(--text);
+    }
+
+    #objectList {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      padding: 14px;
+      overflow-y: auto;
+    }
+
+    #objectList button {
+      min-height: 43px;
+      padding: 10px 9px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.045);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.25;
+      transition: 0.2s ease;
+    }
+
+    #objectList button:active {
+      transform: scale(0.97);
+    }
+
+    #objectList button.selected {
+      border-color: var(--accent);
+      background: rgba(141, 124, 255, 0.18);
       color: #fff;
     }
 
-    .control-button.primary:hover {
-      background: #7969f4;
-    }
-
-    .control-button svg {
-      width: 15px;
-      height: 15px;
-      vertical-align: -3px;
-      margin-right: 5px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    /* --------------------------------
-       Show controls floating button
-    --------------------------------- */
+    /* ================================
+       FLOATING CONTROLS BUTTON
+    ================================= */
 
     #show-controls {
       position: fixed;
-      z-index: 19;
+      z-index: 9;
       right: 16px;
       bottom: max(18px, env(safe-area-inset-bottom));
       display: flex;
@@ -345,21 +406,18 @@
       gap: 8px;
       min-height: 42px;
       padding: 0 15px;
-      border: 1px solid var(--panel-border);
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: rgba(10, 13, 20, 0.78);
+      background: rgba(8, 10, 15, 0.82);
       color: var(--text);
       font-size: 11px;
-      font-weight: 750;
-      cursor: pointer;
+      font-weight: 800;
       opacity: 0;
       transform: translateY(12px);
       pointer-events: none;
+      transition: 0.3s ease;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      transition:
-        opacity 0.3s ease,
-        transform 0.3s ease;
     }
 
     #show-controls.visible {
@@ -371,125 +429,105 @@
     #show-controls svg {
       width: 16px;
       height: 16px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
-    /* --------------------------------
-       Intro / marker modal
-    --------------------------------- */
+    /* ================================
+       INTRO MODAL
+    ================================= */
 
-    .modal-backdrop {
+    #intro {
       position: fixed;
-      z-index: 50;
+      z-index: 30;
       inset: 0;
       display: grid;
       place-items: center;
       padding: 20px;
-      background: rgba(2, 4, 8, 0.74);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      opacity: 1;
+      background: rgba(3, 5, 9, 0.78);
+      backdrop-filter: blur(13px);
+      -webkit-backdrop-filter: blur(13px);
       transition: opacity 0.3s ease;
     }
 
-    .modal-backdrop.hidden {
+    #intro.hidden {
       opacity: 0;
       pointer-events: none;
     }
 
-    .modal {
-      width: min(100%, 380px);
+    .intro-card {
+      width: min(100%, 370px);
       padding: 25px;
-      border: 1px solid var(--panel-border);
-      border-radius: 28px;
+      border: 1px solid var(--border);
+      border-radius: 27px;
       background:
-        radial-gradient(
-          circle at 100% 0%,
-          rgba(139, 124, 255, 0.13),
-          transparent 40%
-        ),
-        #10141d;
-      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.45);
+        radial-gradient(circle at 100% 0%, rgba(141, 124, 255, 0.13), transparent 42%),
+        #11151f;
       text-align: center;
+      box-shadow: 0 25px 90px rgba(0, 0, 0, 0.5);
     }
 
-    .modal-icon {
-      width: 58px;
-      height: 58px;
+    .intro-icon {
+      width: 57px;
+      height: 57px;
       display: grid;
       place-items: center;
-      margin: 0 auto 17px;
-      border: 1px solid rgba(139, 124, 255, 0.3);
+      margin: 0 auto 16px;
+      border: 1px solid rgba(141, 124, 255, 0.3);
       border-radius: 18px;
-      background: rgba(139, 124, 255, 0.12);
+      background: rgba(141, 124, 255, 0.12);
       color: var(--accent);
     }
 
-    .modal-icon svg {
+    .intro-icon svg {
       width: 27px;
       height: 27px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1.6;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
-    .modal h1 {
+    .intro-card h1 {
       margin: 0 0 10px;
       font-size: 23px;
-      letter-spacing: -0.05em;
+      letter-spacing: -0.055em;
     }
 
-    .modal p {
-      margin: 0 auto 20px;
+    .intro-card p {
+      margin: 0 0 19px;
       color: var(--muted);
       font-size: 13px;
       line-height: 1.65;
     }
 
-    .marker-preview {
+    .hiro-image {
       display: block;
-      width: 160px;
+      width: 155px;
       height: auto;
-      margin: 0 auto 21px;
+      margin: 0 auto 19px;
       border-radius: 12px;
       background: #fff;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     }
 
-    .modal-note {
+    .tip {
       display: flex;
-      align-items: flex-start;
       gap: 9px;
+      align-items: flex-start;
       padding: 12px;
       margin-bottom: 17px;
-      border: 1px solid rgba(92, 225, 230, 0.14);
+      border: 1px solid rgba(103, 230, 167, 0.15);
       border-radius: 13px;
-      background: rgba(92, 225, 230, 0.06);
-      color: #b6dfe1;
+      background: rgba(103, 230, 167, 0.055);
+      color: #b7ddd0;
       font-size: 11px;
       line-height: 1.5;
       text-align: left;
     }
 
-    .modal-note svg {
+    .tip svg {
       flex: 0 0 auto;
       width: 16px;
       height: 16px;
+      color: var(--green);
       margin-top: 1px;
-      fill: none;
-      stroke: var(--accent-2);
-      stroke-width: 1.8;
-      stroke-linecap: round;
-      stroke-linejoin: round;
     }
 
-    .start-button {
+    #start-ar {
       width: 100%;
       min-height: 48px;
       border: 0;
@@ -497,300 +535,353 @@
       background: var(--accent);
       color: white;
       font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      transition:
-        background 0.2s ease,
-        transform 0.2s ease;
+      font-weight: 850;
     }
 
-    .start-button:active {
+    #start-ar:active {
       transform: scale(0.98);
     }
 
-    .modal-share {
+    .share-link {
       margin-top: 12px;
       border: 0;
-      background: transparent;
+      background: none;
       color: var(--muted);
       font-size: 11px;
-      cursor: pointer;
     }
 
-    .modal-share:hover {
-      color: white;
-    }
+    /* ================================
+       TOAST
+    ================================= */
 
-    /* Toast */
-    .toast {
+    #toast {
       position: fixed;
       z-index: 100;
       left: 50%;
-      bottom: max(24px, env(safe-area-inset-bottom));
-      transform: translate(-50%, 20px);
+      bottom: max(25px, env(safe-area-inset-bottom));
       max-width: calc(100% - 30px);
-      padding: 11px 16px;
-      border: 1px solid var(--panel-border);
+      padding: 11px 17px;
+      border: 1px solid var(--border);
       border-radius: 999px;
-      background: rgba(16, 20, 29, 0.94);
-      color: white;
+      background: rgba(17, 21, 31, 0.95);
+      color: #fff;
       font-size: 12px;
       font-weight: 650;
       opacity: 0;
+      transform: translate(-50%, 18px);
       pointer-events: none;
-      transition:
-        opacity 0.25s ease,
-        transform 0.25s ease;
-      backdrop-filter: blur(15px);
-      -webkit-backdrop-filter: blur(15px);
+      transition: 0.25s ease;
+      white-space: nowrap;
     }
 
-    .toast.visible {
+    #toast.visible {
       opacity: 1;
       transform: translate(-50%, 0);
     }
 
-    /* On very small screens */
     @media (max-height: 650px) {
-      .controls {
+      #control-panel {
         padding: 13px 15px;
       }
 
-      .control-row {
+      .slider-row {
         margin-bottom: 9px;
       }
 
-      .controls-heading {
+      .panel-head {
         margin-bottom: 10px;
       }
 
-      .modal {
+      .intro-card {
         padding: 20px;
       }
 
-      .marker-preview {
+      .hiro-image {
         width: 120px;
-        margin-bottom: 15px;
+        margin-bottom: 14px;
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      *,
-      *::before,
-      *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+    @media (max-width: 340px) {
+      #objectList {
+        grid-template-columns: 1fr;
       }
     }
   </style>
 </head>
 
 <body>
-  <div id="ar-container">
 
-    <!-- AR scene -->
-    <a-scene
-      id="ar-scene"
-      mindar-image="imageTargetSrc: https://raw.githubusercontent.com/unstopablethinkerr/AR/main/targets.mind; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001;"
-      color-space="sRGB"
-      renderer="colorManagement: true, physicallyCorrectLights"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false"
-      loading-screen="enabled: false"
-      embedded
+  <!-- ============================================================
+       AR SCENE
+       ============================================================ -->
+
+  <a-scene
+    id="ar-scene"
+    embedded
+    vr-mode-ui="enabled: false"
+    renderer="antialias: true; alpha: true; colorManagement: true"
+    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false;"
+    device-orientation-permission-ui="enabled: false"
+    loading-screen="enabled: false"
+  >
+    <a-assets>
+      <!-- Initial model. JavaScript changes this when an object is selected. -->
+      <a-asset-item
+        id="model-asset"
+        src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf">
+      </a-asset-item>
+    </a-assets>
+
+    <!-- Hiro marker is built into AR.js. No .mind file. -->
+    <a-marker
+      id="hiro-marker"
+      preset="hiro"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5"
     >
-      <a-assets>
-        <!-- Replace with the exact GLB path in your AR repository -->
-        <a-asset-item
-          id="ar-model"
-          src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/model.glb">
-        </a-asset-item>
-      </a-assets>
-
-      <a-camera
+      <a-entity
+        id="model-wrapper"
         position="0 0 0"
-        look-controls="enabled: false"
-        cursor="fuse: false"
-        raycaster="objects: .clickable">
-      </a-camera>
-
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-entity
-          id="model-wrapper"
+        rotation="0 0 0"
+        scale="0.3 0.3 0.3"
+      >
+        <a-gltf-model
+          id="model"
+          src="#model-asset"
           position="0 0 0"
           rotation="0 0 0"
-          scale="0.3 0.3 0.3">
-          <a-gltf-model
-            id="model"
-            src="#ar-model"
-            position="0 0 0"
-            rotation="0 0 0">
-          </a-gltf-model>
-        </a-entity>
+        ></a-gltf-model>
       </a-entity>
-    </a-scene>
+    </a-marker>
 
-    <!-- Header -->
-    <header class="topbar" id="topbar">
-      <div class="brand">
-        <span class="brand-dot"></span>
-        AR Experience
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+
+  <header id="topbar">
+    <div class="logo">
+      <span class="logo-mark"></span>
+      AR Viewer
+    </div>
+
+    <div class="top-actions">
+      <button class="round-btn" id="share-btn" type="button" aria-label="Share">
+        <svg viewBox="0 0 24 24">
+          <circle cx="18" cy="5" r="2.5"></circle>
+          <circle cx="6" cy="12" r="2.5"></circle>
+          <circle cx="18" cy="19" r="2.5"></circle>
+          <path d="m8.2 10.8 7.6-4.5"></path>
+          <path d="m8.2 13.2 7.6 4.5"></path>
+        </svg>
+      </button>
+
+      <button class="round-btn" id="help-btn" type="button" aria-label="Instructions">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-1.1 1-1.9 1.3-1.9 2.7"></path>
+          <path d="M12 17h.01"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ============================================================
+       CONTROL PANEL
+       ============================================================ -->
+
+  <section id="control-panel">
+    <div class="panel-head">
+      <div>
+        <div class="panel-title">Model controls</div>
+        <span class="selected-name" id="selected-name">Iron Man</span>
       </div>
 
-      <div class="top-actions">
-        <button
-          class="icon-button"
-          id="share-button"
-          type="button"
-          aria-label="Share AR experience"
-          title="Share"
-        >
-          <svg viewBox="0 0 24 24">
-            <circle cx="18" cy="5" r="2.5"></circle>
-            <circle cx="6" cy="12" r="2.5"></circle>
-            <circle cx="18" cy="19" r="2.5"></circle>
-            <path d="m8.2 10.8 7.6-4.5"></path>
-            <path d="m8.2 13.2 7.6 4.5"></path>
-          </svg>
-        </button>
-
-        <button
-          class="icon-button"
-          id="help-button"
-          type="button"
-          aria-label="Show marker instructions"
-          title="Instructions"
-        >
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-1.1 1-1.9 1.3-1.9 2.7"></path>
-            <path d="M12 17h.01"></path>
-          </svg>
-        </button>
-      </div>
-    </header>
-
-    <!-- Bottom controls -->
-    <section class="controls" id="controls" aria-label="AR model controls">
-      <div class="controls-heading">
-        <div class="controls-title">Model controls</div>
-        <div class="tracking-status">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="status-text">Searching</span>
-        </div>
-      </div>
-
-      <div class="control-row">
-        <div class="control-label">
-          <span>Rotation X</span>
-          <span class="control-value" id="rx-value">0°</span>
-        </div>
-        <input id="rotation-x" type="range" min="-180" max="180" step="1" value="0" />
-      </div>
-
-      <div class="control-row">
-        <div class="control-label">
-          <span>Rotation Y</span>
-          <span class="control-value" id="ry-value">0°</span>
-        </div>
-        <input id="rotation-y" type="range" min="-180" max="180" step="1" value="0" />
-      </div>
-
-      <div class="control-row">
-        <div class="control-label">
-          <span>Rotation Z</span>
-          <span class="control-value" id="rz-value">0°</span>
-        </div>
-        <input id="rotation-z" type="range" min="-180" max="180" step="1" value="0" />
-      </div>
-
-      <div class="control-row">
-        <div class="control-label">
-          <span>Scale</span>
-          <span class="control-value" id="scale-value">0.30×</span>
-        </div>
-        <input id="model-scale" type="range" min="0.03" max="2" step="0.01" value="0.3" />
-      </div>
-
-      <div class="button-row">
-        <button class="control-button" id="reset-button" type="button">
-          <svg viewBox="0 0 24 24">
-            <path d="M3 12a9 9 0 1 0 3-6.7"></path>
-            <path d="M3 4v5h5"></path>
-          </svg>
-          Reset
-        </button>
-
-        <button class="control-button primary" id="hide-button" type="button">
-          <svg viewBox="0 0 24 24">
-            <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
-            <circle cx="12" cy="12" r="2.5"></circle>
-          </svg>
-          Hide controls
-        </button>
-      </div>
-    </section>
-
-    <!-- Floating show controls -->
-    <button id="show-controls" type="button">
-      <svg viewBox="0 0 24 24">
-        <path d="M4 7h16"></path>
-        <path d="M4 12h16"></path>
-        <path d="M4 17h16"></path>
-      </svg>
-      Controls
-    </button>
-
-    <!-- Intro modal -->
-    <div class="modal-backdrop" id="intro-modal">
-      <div class="modal">
-        <div class="modal-icon">
-          <svg viewBox="0 0 24 24">
-            <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-            <path d="M7 9h.01M10 9h.01"></path>
-            <path d="M7 15h10"></path>
-            <path d="M7 12h10"></path>
-          </svg>
-        </div>
-
-        <h1>Bring AR to life</h1>
-        <p>
-          Open the Hiro marker card on another phone, tablet, or computer.
-          Then point this device's camera at the card to see the 3D object.
-        </p>
-
-        <img
-          class="marker-preview"
-          src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/hiro_card.png"
-          alt="Hiro AR marker card"
-        />
-
-        <div class="modal-note">
-          <svg viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9"></circle>
-            <path d="M12 10v6"></path>
-            <path d="M12 7h.01"></path>
-          </svg>
-          <span>
-            <strong>Tip:</strong> Keep the marker flat, well lit, and fully
-            visible. You can use the Share button to send this AR experience
-            to someone else.
-          </span>
-        </div>
-
-        <button class="start-button" id="start-button" type="button">
-          Start AR camera
-        </button>
-
-        <button class="modal-share" id="modal-share-button" type="button">
-          Share this experience
-        </button>
+      <div class="status">
+        <span id="status-dot"></span>
+        <span id="status-text">Searching</span>
       </div>
     </div>
 
-    <!-- Toast -->
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="slider-row">
+      <div class="slider-label">
+        <span>Rotation X</span>
+        <span class="slider-value" id="rx-value">0°</span>
+      </div>
+      <input id="rotation-x" type="range" min="-180" max="180" value="0" step="1" />
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">
+        <span>Rotation Y</span>
+        <span class="slider-value" id="ry-value">0°</span>
+      </div>
+      <input id="rotation-y" type="range" min="-180" max="180" value="0" step="1" />
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">
+        <span>Rotation Z</span>
+        <span class="slider-value" id="rz-value">0°</span>
+      </div>
+      <input id="rotation-z" type="range" min="-180" max="180" value="0" step="1" />
+    </div>
+
+    <div class="slider-row">
+      <div class="slider-label">
+        <span>Scale</span>
+        <span class="slider-value" id="scale-value">0.30×</span>
+      </div>
+      <input id="model-scale" type="range" min="0.01" max="2" value="0.3" step="0.01" />
+    </div>
+
+    <div class="panel-buttons">
+      <button class="panel-btn" id="objects-btn" type="button">
+        <svg viewBox="0 0 24 24" style="vertical-align:-4px; margin-right:4px;">
+          <rect x="4" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="4" width="6" height="6" rx="1"></rect>
+          <rect x="4" y="14" width="6" height="6" rx="1"></rect>
+          <rect x="14" y="14" width="6" height="6" rx="1"></rect>
+        </svg>
+        Objects
+      </button>
+
+      <button class="panel-btn" id="reset-btn" type="button">
+        <svg viewBox="0 0 24 24" style="vertical-align:-4px; margin-right:4px;">
+          <path d="M3 12a9 9 0 1 0 3-6.7"></path>
+          <path d="M3 4v5h5"></path>
+        </svg>
+        Reset
+      </button>
+
+      <button class="panel-btn primary" id="hide-btn" type="button" style="grid-column: 1 / -1;">
+        <svg viewBox="0 0 24 24" style="vertical-align:-4px; margin-right:4px;">
+          <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"></path>
+          <circle cx="12" cy="12" r="2.5"></circle>
+        </svg>
+        Hide controls
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       OBJECT SELECTOR
+       ============================================================ -->
+
+  <div id="object-drawer" class="hidden">
+    <div class="drawer-card">
+      <div class="drawer-head">
+        <div>
+          <div class="drawer-heading">Choose an object</div>
+          <div class="drawer-subtitle">Select a model to place on the Hiro marker</div>
+        </div>
+
+        <button class="drawer-close" id="close-drawer" type="button" aria-label="Close object selector">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 6l12 12"></path>
+            <path d="M18 6 6 18"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div id="objectList">
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/IRONMAN.gltf">Iron Man</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/cowboyhat.glb">Cow Boy Hat</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/antiquecar.glb">Antique Car</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/table.glb">Table</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Bee.glb">Bee</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Windmill.glb">Windmill</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Mountain_Bike.glb">Mountain Bike</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/solar_system.glb">Solar System</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/instagram.glb">Instagram</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/marvel_spider-man.glb">Spider Man</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Giant_Floor_Lamp.glb">Study Lamp</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_earth.glb">Earth</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_moon_sharp.glb">Moon</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/pony_cartoon.glb">Pony Car</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/Wolf-Blender.glb">Wolf</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/chinese_dragon.glb">Chinese Dragon</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/the_big_g_building.glb">Building</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/coeur.glb">Heart Glass</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/heart_in_love.glb">Heart In Love</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/huracan_falcontm.glb">Huracan Falcon</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/130.glb">Car</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/alfa_romeo_stradale_1967.glb">Alfa Romeo Stradale</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/charger.glb">Adapter</button>
+        <button data-model="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/shape4.glb">Sample</button>
+      </div>
+    </div>
   </div>
+
+  <!-- ============================================================
+       FLOATING SHOW CONTROLS
+       ============================================================ -->
+
+  <button id="show-controls" type="button">
+    <svg viewBox="0 0 24 24">
+      <path d="M4 7h16"></path>
+      <path d="M4 12h16"></path>
+      <path d="M4 17h16"></path>
+    </svg>
+    Controls
+  </button>
+
+  <!-- ============================================================
+       STARTUP INSTRUCTIONS
+       ============================================================ -->
+
+  <div id="intro">
+    <div class="intro-card">
+      <div class="intro-icon">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+          <path d="M7 9h.01M10 9h.01"></path>
+          <path d="M7 12h10M7 15h10"></path>
+        </svg>
+      </div>
+
+      <h1>Ready for AR?</h1>
+
+      <p>
+        Open the Hiro marker card on another device.
+        Then point this device's camera at the card to view the 3D model.
+      </p>
+
+      <img
+        class="hiro-image"
+        src="https://raw.githubusercontent.com/unstopablethinkerr/AR/main/hiro_card.png"
+        alt="Hiro AR marker card"
+      />
+
+      <div class="tip">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M12 10v6"></path>
+          <path d="M12 7h.01"></path>
+        </svg>
+        <span>
+          <strong>Use another screen:</strong> Display the Hiro card on a
+          second phone, tablet, or computer. Keep it flat and well lit.
+        </span>
+      </div>
+
+      <button id="start-ar" type="button">
+        Start AR camera
+      </button>
+
+      <button class="share-link" id="intro-share" type="button">
+        Share this experience
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
 
   <script>
     (() => {
@@ -798,84 +889,55 @@
 
       /*
        * ============================================================
-       * CONFIGURATION
-       * ============================================================
-       *
-       * IMPORTANT:
-       * Replace MODEL_URL with the exact raw GitHub URL of your GLB.
-       *
-       * Replace TARGET_URL with the exact raw URL of your compiled
-       * MindAR .mind file.
-       *
-       * The Hiro PNG is only a preview/reference image. MindAR
-       * requires a compiled .mind target file for tracking.
-       */
-
-      const CONFIG = {
-        markerImageUrl:
-          "https://raw.githubusercontent.com/unstopablethinkerr/AR/main/hiro_card.png",
-
-        // Replace this with your actual compiled MindAR target file:
-        targetUrl:
-          "https://raw.githubusercontent.com/unstopablethinkerr/AR/main/targets.mind",
-
-        // Replace this with your actual GLB file:
-        modelUrl:
-          "https://raw.githubusercontent.com/unstopablethinkerr/AR/main/model.glb",
-
-        defaultScale: 0.3
-      };
-
-      /*
-       * ============================================================
-       * DOM REFERENCES
+       * DOM
        * ============================================================
        */
 
       const scene = document.querySelector("#ar-scene");
+      const marker = document.querySelector("#hiro-marker");
       const modelWrapper = document.querySelector("#model-wrapper");
       const model = document.querySelector("#model");
+      const modelAsset = document.querySelector("#model-asset");
 
-      const controls = document.querySelector("#controls");
+      const intro = document.querySelector("#intro");
+      const startAr = document.querySelector("#start-ar");
+      const helpBtn = document.querySelector("#help-btn");
+
+      const shareBtn = document.querySelector("#share-btn");
+      const introShare = document.querySelector("#intro-share");
+
+      const controlPanel = document.querySelector("#control-panel");
       const topbar = document.querySelector("#topbar");
-      const showControlsButton = document.querySelector("#show-controls");
+      const hideBtn = document.querySelector("#hide-btn");
+      const showControls = document.querySelector("#show-controls");
+      const resetBtn = document.querySelector("#reset-btn");
 
-      const introModal = document.querySelector("#intro-modal");
-      const startButton = document.querySelector("#start-button");
-      const helpButton = document.querySelector("#help-button");
-      const shareButton = document.querySelector("#share-button");
-      const modalShareButton = document.querySelector("#modal-share-button");
-
-      const resetButton = document.querySelector("#reset-button");
-      const hideButton = document.querySelector("#hide-button");
+      const objectsBtn = document.querySelector("#objects-btn");
+      const objectDrawer = document.querySelector("#object-drawer");
+      const closeDrawer = document.querySelector("#close-drawer");
+      const objectList = document.querySelector("#objectList");
+      const selectedName = document.querySelector("#selected-name");
 
       const statusDot = document.querySelector("#status-dot");
       const statusText = document.querySelector("#status-text");
       const toast = document.querySelector("#toast");
 
-      const rotationX = document.querySelector("#rotation-x");
-      const rotationY = document.querySelector("#rotation-y");
-      const rotationZ = document.querySelector("#rotation-z");
-      const modelScale = document.querySelector("#model-scale");
+      const rx = document.querySelector("#rotation-x");
+      const ry = document.querySelector("#rotation-y");
+      const rz = document.querySelector("#rotation-z");
+      const scale = document.querySelector("#model-scale");
 
       const rxValue = document.querySelector("#rx-value");
       const ryValue = document.querySelector("#ry-value");
       const rzValue = document.querySelector("#rz-value");
       const scaleValue = document.querySelector("#scale-value");
 
-      /*
-       * ============================================================
-       * STATE
-       * ============================================================
-       */
-
-      let controlsVisible = true;
+      let toastTimer;
       let isTracking = false;
-      let toastTimer = null;
 
       /*
        * ============================================================
-       * HELPERS
+       * TOAST
        * ============================================================
        */
 
@@ -887,118 +949,173 @@
 
         toastTimer = setTimeout(() => {
           toast.classList.remove("visible");
-        }, 2400);
+        }, 2300);
       }
 
-      function setStatus(tracking) {
-        isTracking = tracking;
+      /*
+       * ============================================================
+       * MODEL TRANSFORMS
+       * ============================================================
+       */
 
-        if (tracking) {
-          statusDot.classList.add("active");
-          statusText.textContent = "Tracking";
-        } else {
-          statusDot.classList.remove("active");
-          statusText.textContent = "Searching";
-        }
-      }
-
-      function updateModelTransform() {
-        const x = Number(rotationX.value);
-        const y = Number(rotationY.value);
-        const z = Number(rotationZ.value);
-        const scale = Number(modelScale.value);
+      function updateTransform() {
+        const x = Number(rx.value);
+        const y = Number(ry.value);
+        const z = Number(rz.value);
+        const s = Number(scale.value);
 
         /*
-         * A-Frame rotation uses degrees:
+         * A-Frame rotation format:
          * rotation="X Y Z"
          *
-         * Applying all three values to the wrapper means the
-         * model can be independently oriented around every axis.
+         * All three rotations are applied to the wrapper.
+         * The Hiro marker pose remains unchanged.
          */
         modelWrapper.setAttribute("rotation", `${x} ${y} ${z}`);
-        modelWrapper.setAttribute("scale", `${scale} ${scale} ${scale}`);
+        modelWrapper.setAttribute("scale", `${s} ${s} ${s}`);
 
         rxValue.textContent = `${x}°`;
         ryValue.textContent = `${y}°`;
         rzValue.textContent = `${z}°`;
-        scaleValue.textContent = `${scale.toFixed(2)}×`;
+        scaleValue.textContent = `${s.toFixed(2)}×`;
       }
 
-      function resetModelTransform() {
-        rotationX.value = "0";
-        rotationY.value = "0";
-        rotationZ.value = "0";
-        modelScale.value = String(CONFIG.defaultScale);
+      function resetTransform() {
+        rx.value = "0";
+        ry.value = "0";
+        rz.value = "0";
+        scale.value = "0.3";
 
-        updateModelTransform();
+        updateTransform();
         showToast("Model reset");
       }
 
-      function hideControls() {
-        controlsVisible = false;
-        controls.classList.add("hidden");
-        topbar.classList.add("hidden");
-        showControlsButton.classList.add("visible");
+      /*
+       * ============================================================
+       * OBJECT SELECTION
+       * ============================================================
+       *
+       * Changing the asset item's src and the model's src lets
+       * the same AR marker display a different GLB/GLTF.
+       */
+
+      function selectObject(button) {
+        const modelUrl = button.dataset.model;
+        const objectName = button.textContent.trim();
+
+        if (!modelUrl) return;
+
+        // Update the asset source.
+        modelAsset.setAttribute("src", modelUrl);
+
+        // Update the model source.
+        model.setAttribute("src", modelUrl);
+
+        // Reset orientation and scale for the new model.
+        resetTransform();
+
+        // Update selected label.
+        selectedName.textContent = objectName;
+
+        // Highlight selected object.
+        objectList.querySelectorAll("button").forEach((item) => {
+          item.classList.remove("selected");
+        });
+
+        button.classList.add("selected");
+
+        closeObjectDrawer();
+        showToast(`${objectName} selected`);
       }
 
-      function showControls() {
-        controlsVisible = true;
-        controls.classList.remove("hidden");
+      objectList.querySelectorAll("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          selectObject(button);
+        });
+      });
+
+      function openObjectDrawer() {
+        objectDrawer.classList.remove("hidden");
+      }
+
+      function closeObjectDrawer() {
+        objectDrawer.classList.add("hidden");
+      }
+
+      objectsBtn.addEventListener("click", openObjectDrawer);
+      closeDrawer.addEventListener("click", closeObjectDrawer);
+
+      // Close when tapping the dark backdrop.
+      objectDrawer.addEventListener("click", (event) => {
+        if (event.target === objectDrawer) {
+          closeObjectDrawer();
+        }
+      });
+
+      /*
+       * ============================================================
+       * UI VISIBILITY
+       * ============================================================
+       */
+
+      function hideUI() {
+        controlPanel.classList.add("hidden");
+        topbar.classList.add("hidden");
+        showControls.classList.add("visible");
+      }
+
+      function showUI() {
+        controlPanel.classList.remove("hidden");
         topbar.classList.remove("hidden");
-        showControlsButton.classList.remove("visible");
+        showControls.classList.remove("visible");
       }
 
       function openInstructions() {
-        introModal.classList.remove("hidden");
+        intro.classList.remove("hidden");
       }
 
       function closeInstructions() {
-        introModal.classList.add("hidden");
+        intro.classList.add("hidden");
       }
 
       /*
        * ============================================================
        * SHARE
        * ============================================================
-       *
-       * Native share on mobile; clipboard fallback on desktop.
        */
 
       async function shareExperience() {
-        const shareData = {
-          title: "AR Experience",
-          text: "Open this AR experience and scan the Hiro marker with another device.",
+        const data = {
+          title: "AR Viewer",
+          text: "Open this AR experience and scan the Hiro marker.",
           url: window.location.href
         };
 
         try {
           if (navigator.share) {
-            await navigator.share(shareData);
+            await navigator.share(data);
             return;
           }
 
           if (navigator.clipboard && window.isSecureContext) {
             await navigator.clipboard.writeText(window.location.href);
-            showToast("Link copied to clipboard");
+            showToast("Link copied");
             return;
           }
 
-          // Older fallback
-          const textArea = document.createElement("textarea");
-          textArea.value = window.location.href;
-          textArea.style.position = "fixed";
-          textArea.style.opacity = "0";
-          document.body.appendChild(textArea);
-          textArea.select();
+          const textarea = document.createElement("textarea");
+          textarea.value = window.location.href;
+          textarea.style.position = "fixed";
+          textarea.style.opacity = "0";
+          document.body.appendChild(textarea);
+          textarea.select();
           document.execCommand("copy");
-          textArea.remove();
+          textarea.remove();
 
-          showToast("Link copied to clipboard");
+          showToast("Link copied");
         } catch (error) {
-          // User cancelling native share is not an error to display.
           if (error && error.name === "AbortError") return;
-
-          showToast("Unable to share. Copy the page URL manually.");
+          showToast("Sharing cancelled");
         }
       }
 
@@ -1008,80 +1125,60 @@
        * ============================================================
        */
 
-      [rotationX, rotationY, rotationZ, modelScale].forEach((input) => {
-        input.addEventListener("input", updateModelTransform);
+      [rx, ry, rz, scale].forEach((input) => {
+        input.addEventListener("input", updateTransform);
       });
 
-      resetButton.addEventListener("click", resetModelTransform);
-      hideButton.addEventListener("click", hideControls);
-      showControlsButton.addEventListener("click", showControls);
+      resetBtn.addEventListener("click", resetTransform);
+      hideBtn.addEventListener("click", hideUI);
+      showControls.addEventListener("click", showUI);
 
-      shareButton.addEventListener("click", shareExperience);
-      modalShareButton.addEventListener("click", shareExperience);
+      shareBtn.addEventListener("click", shareExperience);
+      introShare.addEventListener("click", shareExperience);
 
-      helpButton.addEventListener("click", openInstructions);
+      helpBtn.addEventListener("click", openInstructions);
 
-      startButton.addEventListener("click", () => {
+      startAr.addEventListener("click", () => {
         closeInstructions();
-
-        // MindAR starts its camera when the scene is ready.
-        if (scene.systems["mindar-image-system"]) {
-          scene.systems["mindar-image-system"].start();
-        }
       });
 
       /*
        * ============================================================
-       * MINDAR EVENTS
+       * MARKER STATUS
        * ============================================================
        */
 
-      scene.addEventListener("targetFound", () => {
-        setStatus(true);
+      marker.addEventListener("markerFound", () => {
+        isTracking = true;
+        statusDot.classList.add("tracking");
+        statusText.textContent = "Tracking";
 
-        // Automatically hide controls when the marker is found.
+        // Hide UI automatically after the marker is found.
         setTimeout(() => {
-          if (isTracking && controlsVisible) {
-            hideControls();
-          }
-        }, 900);
+          if (isTracking) hideUI();
+        }, 800);
       });
 
-      scene.addEventListener("targetLost", () => {
-        setStatus(false);
-      });
-
-      scene.addEventListener("arReady", () => {
-        setStatus(false);
-      });
-
-      scene.addEventListener("arError", (event) => {
-        console.error("AR error:", event.detail || event);
-        showToast("Camera or AR tracking could not start");
+      marker.addEventListener("markerLost", () => {
+        isTracking = false;
+        statusDot.classList.remove("tracking");
+        statusText.textContent = "Searching";
       });
 
       /*
        * ============================================================
        * INITIALIZATION
        * ============================================================
-       *
-       * Update runtime asset paths from CONFIG. This makes it easy
-       * to maintain the actual GitHub filenames in one place.
        */
 
-      scene.setAttribute(
-        "mindar-image",
-        `imageTargetSrc: ${CONFIG.targetUrl}; maxTrack: 1; filterMinCF: 0.0001; filterBeta: 0.001;`
-      );
+      // Mark Iron Man as the initial selected object.
+      const firstObject = objectList.querySelector("button");
+      if (firstObject) {
+        firstObject.classList.add("selected");
+        selectedName.textContent = firstObject.textContent.trim();
+      }
 
-      const assetItem = document.querySelector("#ar-model");
-      assetItem.setAttribute("src", CONFIG.modelUrl);
-
-      // Keep the model reference synchronized with the asset item.
-      model.setAttribute("src", "#ar-model");
-
-      updateModelTransform();
-      setStatus(false);
+      updateTransform();
     })();
   </script>
 </body>
